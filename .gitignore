@@ -1,0 +1,7 @@
+*.sqlite3
+/media/
+media/
+migrations/
+__pycache__/
+*.pyc
+backend/mlp/settings_dev.py
