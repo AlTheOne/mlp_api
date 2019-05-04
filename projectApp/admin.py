@@ -1,12 +1,12 @@
 from django.contrib import admin
-from projectApp.models import Project, Tag, Status
+from projectApp.models import Project, Technology, Status
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
+@admin.register(Technology)
+class TechnologyAdmin(admin.ModelAdmin):
     list_display = ('id', 'title', 'slug')
     list_display_links = ('title',)
 

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'tinymce',
     'projectApp',
     'staticPageApp',
+    'userApp',
 ]
 
 MIDDLEWARE = [

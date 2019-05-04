@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from projectApp.models import Project, Tag, Status
+from projectApp.models import Project, Technology, Status
 
 
-class TagSerializer(serializers.ModelSerializer):
+class TechnologySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Tag
+        model = Technology
         fields = ('title', 'slug')
         extra_kwargs = {
             'title': {'validators': []},
@@ -19,7 +19,7 @@ class StatusSerializer(serializers.ModelSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     status = StatusSerializer()
-    tags = TagSerializer(many=True)
+    technologies = TechnologySerializer(many=True)
 
     class Meta:
         model = Project
@@ -35,42 +35,42 @@ class ProjectSerializer(serializers.ModelSerializer):
 
         return status_data
 
-    def validate_tags(self, tag_data_list):
-        wrong_tags = []
+    def validate_technologies(self, tech_data_list):
+        wrong_techs = []
 
-        for tag_data in tag_data_list:
-            title, slug = tag_data.values()
-            if not Tag.objects.filter(title=title, slug=slug).exists():
-                wrong_tags.append(title)
+        for tech_data in tech_data_list:
+            title, slug = tech_data.values()
+            if not Technology.objects.filter(title=title, slug=slug).exists():
+                wrong_techs.append(title)
 
-        if not wrong_tags:
-            return tag_data_list
+        if not wrong_techs:
+            return tech_data_list
 
-        issue = "Problem with next tags: '%s'" % ", ".join(wrong_tags)
+        issue = "Problem with next techs: '%s'" % ", ".join(wrong_techs)
         raise serializers.ValidationError(issue)
 
     # Setting write methods explicitly:
 
     def create(self, validated_data):
         status_data = validated_data.pop('status')
-        tags_data = validated_data.pop('tags')
+        techs_data = validated_data.pop('technologies')
 
         status = Status.objects.get(**status_data)
-        tags = [Tag.objects.get(**td) for td in tags_data]
+        techs = [Technology.objects.get(**td) for td in techs_data]
 
         project = Project.objects.create(**validated_data, status=status)
-        project.tags.set(tags)
+        project.technologies.set(techs)
         return project
 
     def update(self, instance, validated_data):
         status_data = validated_data.pop('status')
-        tags_data = validated_data.pop('tags')
+        techs_data = validated_data.pop('technologies')
 
         status = Status.objects.get(**status_data)
-        tags = [Tag.objects.get(**td) for td in tags_data]
+        techs = [Technology.objects.get(**td) for td in techs_data]
 
         instance.status = status
-        instance.tags.set(tags)
+        instance.technologies.set(techs)
         for key, value in validated_data.items():
             setattr(instance, key, value)
 
