@@ -6,3 +6,4 @@ __pycache__/
 *.pyc
 backend/mlp/settings_dev.py
 mlp_api/settings_dev.py
+.idea/
