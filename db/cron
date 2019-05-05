@@ -1,0 +1,4 @@
+0 0 7 * * postgres /var/pg/backup.sh
+0 1 7 * * postgres /var/pg/clean-backup.sh
+
+# cron needs an empty line at the end, leave this here.
