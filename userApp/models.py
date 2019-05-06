@@ -3,12 +3,14 @@ import io
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.validators import MinLengthValidator, FileExtensionValidator
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.conf import settings
 from PIL import Image
-from mlp_api.settings import MEDIA_ROOT
+from userApp.manager import UserManager
 from userApp.utils import get_userpic_path, get_thumbnail_name
 from userApp.validators import MinImageSizeValidator
 
-class UserAuthorizingData(models.Model):
+class User(AbstractBaseUser, PermissionsMixin):
     login = models.CharField(
         _('login'),
         max_length=255,
@@ -24,7 +26,6 @@ class UserAuthorizingData(models.Model):
         unique=True,
         help_text="Phone number in international format without '+','(',')','-'."
     )
-    password = models.TextField(_('password'))
     email_confirmed = models.BooleanField(_('email confirmed'), default=False)
     date_of_creation = models.DateTimeField(
         _('date of creation'),
@@ -37,9 +38,13 @@ class UserAuthorizingData(models.Model):
         auto_now = True
     )
 
-    class Meta:
-        verbose_name = _("authorizing user's data")
-        verbose_name_plural = _("authorizing data of users")
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = 'login'
+    REQUIRED_FIELDS = ('email', 'phone')
 
     def __str__(self):
         return self.login + ": " + self.email
@@ -78,7 +83,7 @@ class UserPersonalData(models.Model):
     )
 
     auth_data = models.OneToOneField(
-        'UserAuthorizingData',
+        settings.AUTH_USER_MODEL,
         related_name='personal_data',
         on_delete=models.CASCADE,
         verbose_name=_('user\'s authorizing data')
@@ -98,8 +103,8 @@ class UserPersonalData(models.Model):
 
     def _get_avatar_dir(self):
         """ Returns path to directory for user's avatar. """
-        userpic_dirname = "user_%s" % self.auth_data.id
-        return os.path.join(MEDIA_ROOT, 'userApp', 'avatar', userpic_dirname)
+        user_dir = "user_%s" % self.auth_data.id
+        return os.path.join(settings.MEDIA_ROOT, 'userApp', 'avatar', user_dir)
 
     def _make_avatar_from_field(self):
         if not self.avatar: return None
@@ -131,7 +136,7 @@ class UserPersonalData(models.Model):
                 if old_avatar:
                     # Remove avatar thumbnail:
                     thumbnail_path = os.path.join(
-                        MEDIA_ROOT,
+                        settings.MEDIA_ROOT,
                         get_thumbnail_name(old_avatar.name)
                     )
                     os.remove(thumbnail_path)
@@ -163,10 +168,10 @@ class UserProgress(models.Model):
     )
 
     user = models.OneToOneField(
-        'UserAuthorizingData',
+        settings.AUTH_USER_MODEL,
         related_name='progress',
         on_delete=models.CASCADE,
-        verbose_name=_('user\'s progress')
+        verbose_name=_('user')
     )
 
     class Meta:

@@ -1,6 +1,5 @@
 from os import path
 import re
-from mlp_api.settings import MEDIA_ROOT
 
 def get_userpic_path(instance, filename):
     """
