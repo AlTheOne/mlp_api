@@ -9,7 +9,7 @@ media/
 static/
 migrations/
 backend/mlp/settings_dev.py
-mlp_api/settings_dev.py
+mlp_api/mlp_api/settings_dev.py
 .idea/
 db/backups/
 build/

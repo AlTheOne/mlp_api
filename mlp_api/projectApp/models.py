@@ -65,10 +65,10 @@ class Project(models.Model):
         on_delete=models.SET_NULL,
         verbose_name=_('status')
     )
-    tags = models.ManyToManyField(
-        'Tag',
+    technologies = models.ManyToManyField(
+        'Technology',
         related_name='projects',
-        verbose_name=_('tags')
+        verbose_name=_('programming languages/technologies')
     )
 
     class Meta:
@@ -93,11 +93,11 @@ class Project(models.Model):
     def __str__(self):
         return "'%s' project." % self.title
 
-class Tag(models.Model):
+class Technology(models.Model):
     """
-    Represents tag which marks programming language or technology,
-    used in some project. Project can have many tags, so it has
-    one to many relation with Project model.
+    Represents programming language or technology,
+    used in some project. Many technologies can be attached to a project,
+    so it has many to many relationship with Project model.
     """
 
     title = models.CharField(
@@ -115,8 +115,8 @@ class Tag(models.Model):
     )
 
     class Meta:
-        verbose_name = _("project's tag")
-        verbose_name_plural = _("project's tags")
+        verbose_name = _("project's technology")
+        verbose_name_plural = _("project's technologies")
 
     def save(self, *args, **kwargs):
         """

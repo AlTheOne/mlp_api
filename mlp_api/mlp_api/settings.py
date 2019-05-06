@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'tinymce',
     'projectApp',
     'staticPageApp',
+    'userApp',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +88,9 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+# User authentication model:
+AUTH_USER_MODEL = 'userApp.User'
 
 # Cashe
 
