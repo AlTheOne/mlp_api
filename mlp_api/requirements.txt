@@ -1,11 +1,16 @@
+cffi==1.12.3
 Django==2.2
+django-redis==4.10.0
 django-tinymce==2.8.0
 djangorestframework==3.9.2
+gunicorn==19.9.0
 Pillow==6.0.0
 psycopg2==2.8.2
 psycopg2-binary==2.8.2
+pycparser==2.19
 python-slugify==3.0.2
 pytils==0.3
 pytz==2019.1
+redis==3.2.1
 sqlparse==0.3.0
 text-unidecode==1.2
