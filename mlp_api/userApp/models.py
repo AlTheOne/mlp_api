@@ -146,7 +146,7 @@ class UserPersonalData(models.Model):
                 # If there is a new avatar, it should be stored:
                 self._make_avatar_from_field()
 
-        except UserPersonalData.DoesNotExist:
+        except (UserPersonalData.DoesNotExist, FileNotFoundError):
             self._make_avatar_from_field()
 
     def save(self, *args, **kwargs):
