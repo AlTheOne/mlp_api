@@ -12,7 +12,6 @@ class Task (models.Model):
     title = models.CharField(
         _('title'),
         max_length=255,
-        unique=True,
         help_text=_("At most 255 characters.")
     )
     task_description = HTMLField(
@@ -20,34 +19,32 @@ class Task (models.Model):
     )
     task_project = models.ForeignKey(
         Project,
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
+        related_name='task_project',
         verbose_name=_('project')
     )
     task_current = models.ForeignKey(
         'self',
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         verbose_name=_('current task')
     )
     user = models.ForeignKey(
         User,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='user',
+        related_name='author_task_user',
         verbose_name=_('user')
     )
     executor = models.ForeignKey(
         User,
         null=True,
         on_delete=models.SET_NULL,
-        related_name='executor',
+        related_name='task_executor_user',
         verbose_name=_('executor')
     )
     task_status = models.ForeignKey(
         'StatusTask',
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         verbose_name=_('task status')
     )
     task_label = models.ForeignKey(
@@ -95,16 +92,17 @@ class LabelTask (models.Model):
     title = models.CharField(
         _('title'),
         max_length=50,
-        unique=True,
         help_text=_("At most 50 characters.")
     )
     color = ColorField(
-        default='#ffffff'
+        _('color'),
+        default='#ffffff',
+        help_text=_("Select label color")
     )
     task_project = models.ForeignKey(
         Project,
-        null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
+        related_name='color_task_project',
         verbose_name=_('project')
     )
 
