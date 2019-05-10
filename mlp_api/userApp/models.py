@@ -194,7 +194,7 @@ class UserProgress(models.Model):
 
 
 class AccountActivationCode(models.Model):
-    code = models.TextField(_('account activation code'))
+    code = models.TextField(_('account activation code'), blank=True)
     date_of_creation = models.DateTimeField(auto_now_add=True, auto_now=False)
 
     user = models.OneToOneField(
