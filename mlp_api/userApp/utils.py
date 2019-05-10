@@ -3,6 +3,7 @@ import re
 import random
 from string import ascii_letters, digits
 
+
 def get_userpic_path(instance, filename):
     """
     Takes an instance of UserPersonalData model and name of profile's picture.
