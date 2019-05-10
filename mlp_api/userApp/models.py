@@ -1,13 +1,20 @@
 import os
 import io
+from datetime import timedelta
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.core.mail import send_mail
 from django.core.validators import MinLengthValidator, FileExtensionValidator
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.conf import settings
 from PIL import Image
 from userApp.manager import UserManager
-from userApp.utils import get_userpic_path, get_thumbnail_name
+from userApp.utils import (
+    get_userpic_path,
+    get_thumbnail_name,
+    generate_random_string
+)
 from userApp.validators import MinImageSizeValidator
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -48,6 +55,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.login + ": " + self.email
+
+    def email_user(self, subject, message, from_email=None, **kwargs):
+        send_mail(subject, message, from_email, [self.email], **kwargs)
 
 class UserPersonalData(models.Model):
     first_name = models.CharField(
@@ -181,3 +191,70 @@ class UserProgress(models.Model):
     def __str__(self):
         line = "%s: level = %d, rating = %d"
         return line % (self.user.login, self.level, self.reputation_point)
+
+
+class AccountActivationCode(models.Model):
+    code = models.TextField(_('account activation code'))
+    date_of_creation = models.DateTimeField(auto_now_add=True, auto_now=False)
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name='activation_code',
+        on_delete=models.CASCADE,
+        verbose_name=_('user')
+    )
+
+    email_message_template = {
+        'subject': _("MLP Account Activation"),
+        'body': _(
+            "Hi, %(username)s!\n" +
+            "To activate your account, follow the next link:\n" +
+            "%(link)s"
+        )
+    }
+    link_template = (
+        "%(protocol)s://%(hostname)s:%(port)d"
+        "/api/v1/account-activation/%(code)s/"
+    )
+    expiration_term = timedelta(hours=24)
+
+    class Meta:
+        verbose_name = _("account activation code")
+        verbose_name_plural = _("account activation codes")
+
+    @classmethod
+    def get_actuals(cls):
+        """
+        Returns filtered queryset of model items,
+        which was created not later then expiration date.
+        """
+        time_floor = timezone.now() - cls.expiration_term
+        return cls.objects.filter(date_of_creation__gte=time_floor)
+
+    def __str__(self):
+        return self.code
+
+    def _generate_link(self):
+        """ Returns reliable account activation link. """
+
+        # Like a temporary solution, we can user a pre-defined
+        # dictionary in settings_dev.py to configure an absolute url base
+        # depending on development server's parameters
+        return self.link_template % {
+            'protocol': settings.MLP_WEBSITE['protocol'],
+            'hostname': settings.MLP_WEBSITE['hostname'],
+            'port': settings.MLP_WEBSITE['port'],
+            'code': self.code
+        }
+
+    def notificate_user(self):
+        msg_body = {'username': self.user.login, 'link': self._generate_link()}
+        self.user.email_user(
+            self.email_message_template['subject'],
+            self.email_message_template['body'] % msg_body,
+        )
+
+    def save(self, *args, **kwargs):
+        self.code = generate_random_string(30, 40)
+        self.notificate_user()
+        super().save(*args, **kwargs)
