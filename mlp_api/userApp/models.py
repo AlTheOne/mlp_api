@@ -59,6 +59,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def email_user(self, subject, message, from_email=None, **kwargs):
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
+
 class UserPersonalData(models.Model):
     first_name = models.CharField(
         _('first name'),
@@ -162,6 +163,7 @@ class UserPersonalData(models.Model):
     def save(self, *args, **kwargs):
         self._update_avatar()
         super().save(*args, **kwargs)
+
 
 class UserProgress(models.Model):
     level = models.PositiveSmallIntegerField(
