@@ -1,5 +1,5 @@
 from rest_framework import routers
-from taskApp.views import TaskViewSet
+from .views import TaskViewSet
 
 router = routers.SimpleRouter()
 router.register(r'task', TaskViewSet)
