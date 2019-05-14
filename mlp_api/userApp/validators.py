@@ -33,6 +33,10 @@ class ImageSizeValidator:
             # when you attempt to read its 'width/height' property.
             size = Image.open(value.file).size
 
+        except FileNotFoundError:
+            # In case if image was removed manually from user's directory:
+            raise ValidationError("Image is not present in user's directory.")
+
         limit_size = self.limit_width, self.limit_height
 
         if self.compare_size(size, limit_size):

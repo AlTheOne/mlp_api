@@ -25,8 +25,12 @@ class Task (models.Model):
     )
     task_current = models.ForeignKey(
         'self',
+<<<<<<< HEAD
         null=True,
         on_delete=models.SET_NULL,
+=======
+        on_delete=models.CASCADE,
+>>>>>>> e1470c48924e3ba85afc1090e5f80190ec5708fd
         verbose_name=_('current task')
     )
     user = models.ForeignKey(

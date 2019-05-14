@@ -1,6 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from userApp.models import User, UserPersonalData, UserProgress
+from userApp.models import (
+    User,
+    UserPersonalData,
+    UserProgress,
+    AccountActivationCode
+)
 from userApp.forms import UserCreationForm, UserChangeForm
 
 
@@ -42,3 +47,10 @@ class UserProfileAdmin(admin.ModelAdmin):
 @admin.register(UserProgress)
 class UserProgressAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(AccountActivationCode)
+class AccountActivationAdmin(admin.ModelAdmin):
+    list_display = ('code', 'user')
+    list_display_links = ('code',)
+    readonly_fields = ('code',)
+    fields = ('code', 'user')
