@@ -4,8 +4,20 @@ from rest_framework import viewsets
 from .models import Task
 from .serializers import TaskSerializer
 
-class TaskViewSet(viewsets.ModelViewSet):
+# class TaskViewSet(viewsets.ModelViewSet):
+#
+#     queryset = Task.objects.all()
+#     serializer_class = TaskSerializer
 
-    queryset = Task.objects.all()
+
+class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
-    lookup_field = 'task_project_id'
+
+    def get_queryset(self, *args, **kwargs):
+        queryset = Task.objects.all()
+        return queryset
+
+    def list(self, *args, **kwargs):
+        queryset = Task.objects.all()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
