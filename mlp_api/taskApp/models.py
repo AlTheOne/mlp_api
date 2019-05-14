@@ -25,7 +25,9 @@ class Task (models.Model):
     )
     task_current = models.ForeignKey(
         'self',
-        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         verbose_name=_('current task')
     )
     user = models.ForeignKey(
@@ -38,6 +40,7 @@ class Task (models.Model):
     executor = models.ForeignKey(
         User,
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
         related_name='task_executor_user',
         verbose_name=_('executor')

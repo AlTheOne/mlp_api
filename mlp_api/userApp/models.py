@@ -243,9 +243,9 @@ class AccountActivationCode(models.Model):
         # dictionary in settings_dev.py to configure an absolute url base
         # depending on development server's parameters
         return self.link_template % {
-            'protocol': settings.MLP_WEBSITE['protocol'],
-            'hostname': settings.MLP_WEBSITE['hostname'],
-            'port': settings.MLP_WEBSITE['port'],
+            'protocol': settings.SMTP_SERVICE['EMAIL_PROTOCOL'],
+            'hostname': settings.SMTP_SERVICE['EMAIL_HOST'],
+            'port': settings.SMTP_SERVICE['EMAIL_PORT'],
             'code': self.code
         }
 

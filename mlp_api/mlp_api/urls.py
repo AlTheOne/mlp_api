@@ -15,9 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 from mlp_api.urls_api import router
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api-token-auth/', obtain_jwt_token),
+    path('api-token-refresh/', refresh_jwt_token),
     path('api/v1/', include(router.urls)),
 ]

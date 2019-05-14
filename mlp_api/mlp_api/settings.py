@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'staticPageApp',
     'userApp',
     'taskApp',
+    'groupProjectApp',
 ]
 
 MIDDLEWARE = [
@@ -148,10 +149,34 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+
+# Data for formation url in email
+SMTP_SERVICE = {
+    'EMAIL_PROTOCOL': 'http',
+    'EMAIL_HOST': '157.230.108.47',
+    'EMAIL_PORT': 8090,
+}
+
+# Settings SMTP
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+
+SERVER_EMAIL = os.getenv('SERVER_EMAIL')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+
 # Settings for rest framework
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 50,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
 }
 
 
