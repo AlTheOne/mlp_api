@@ -23,6 +23,13 @@ class Task (models.Model):
         related_name='task_project',
         verbose_name=_('project')
     )
+    task_project_active = models.ForeignKey(
+        Project,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name='project_active',
+        verbose_name=_('is active')
+    )
     task_current = models.ForeignKey(
         'self',
         null=True,
