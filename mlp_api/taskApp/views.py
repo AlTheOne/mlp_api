@@ -12,7 +12,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         queryset = Task.objects.all()
         return queryset
 
-    def list(self, request, *args, **kwargs):
-        queryset = Task.objects.all()
+    def list(self, *args, **kwargs):
+        queryset = Task.objects.filter(project__slug=kwargs.get('project_slug'))
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
