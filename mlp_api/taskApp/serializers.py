@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from .models import Task
+from taskApp.models import Task
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
@@ -14,7 +14,8 @@ class TaskSerializer(serializers.ModelSerializer):
             'date_of_updated'
         )
 
-class TaskProjectSerializer(serializers.ModelSerializer):
+
+class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
