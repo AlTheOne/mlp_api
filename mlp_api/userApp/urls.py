@@ -4,7 +4,7 @@ from userApp.views import UserViewSet, AccountActivationViewSet
 
 
 router = routers.SimpleRouter()
-router.register(r'user', UserViewSet)
+router.register(r'', UserViewSet)
 router.register(r'account-activation', AccountActivationViewSet, 'account-activation')
 
 urlpatterns = router.urls

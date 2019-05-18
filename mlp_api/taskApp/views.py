@@ -20,12 +20,17 @@ class TaskViewSet(viewsets.ModelViewSet):
         return queryset
 
     def list(self, *args, **kwargs):
-        queryset = Task.objects.filter(task_project__slug=kwargs.get('project_slug'))
+        queryset = Task.objects.filter(
+            task_project__slug=kwargs.get('project_slug')
+        )
         serializer = TaskListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, project_slug, pk=None):
-        queryset = Task.objects.filter(task_project__slug=project_slug)
-        task = get_object_or_404(queryset, pk=pk)
-        serializer = TaskSerializer(queryset, many=True)
+        task = get_object_or_404(
+            Task,
+            pk=pk,
+            task_project__slug=project_slug
+        )
+        serializer = TaskSerializer(task)
         return Response(serializer.data)
