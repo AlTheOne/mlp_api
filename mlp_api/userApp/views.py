@@ -21,6 +21,7 @@ class UserViewSet(*create_retrieve_list_interface, GenericViewSet):
     lookup_field = 'login'
 
 class AccountActivationViewSet(GenericViewSet):
+    serializer_class = UserSerializer
     lookup_field = 'code'
 
     def get_queryset(self):

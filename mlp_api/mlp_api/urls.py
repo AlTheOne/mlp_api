@@ -19,9 +19,15 @@ from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 from mlp_api.urls_api import router
 
 
+from rest_framework_swagger.views import get_swagger_view
+
+schema_view = get_swagger_view(title='API')
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-token-auth/', obtain_jwt_token),
     path('api-token-refresh/', refresh_jwt_token),
     path('api/v1/', include(router.urls)),
+    path('', schema_view),
 ]
