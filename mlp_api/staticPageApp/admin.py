@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Page
+from staticPageApp.models import Page, BlockPage
 
 
 @admin.register(Page)
@@ -19,8 +19,25 @@ class PageAdmin(admin.ModelAdmin):
         'title',
         'slug',
         'seo_description',
-        'content',
+        'blocks_content',
         'is_activate',
         ('data_of_updated', 'data_of_created')
     )
     save_on_top = True
+
+
+@admin.register(BlockPage)
+class BlockPageAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'title',
+        'data_of_updated',
+        'data_of_created'
+    )
+    list_display_links = ('title',)
+    readonly_fields = ('data_of_updated', 'data_of_created')
+    fields = (
+        'title',
+        'content',
+        ('data_of_updated', 'data_of_created')
+    )
