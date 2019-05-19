@@ -7,7 +7,7 @@ from tinymce.models import HTMLField
 
 
 class Page(models.Model):
-    """ Page Class is designed to create separate Pages of this Project. """
+    """Static page make up from selected blocks"""
 
     title = models.CharField(
         _('title'),
@@ -27,8 +27,9 @@ class Page(models.Model):
         max_length=100,
         help_text=_("At most 100 characters.")
     )
-    content = HTMLField(
-        _('content')
+    blocks_content = models.ManyToManyField(
+        'BlockPage',
+        verbose_name=_('Blocks of content')
     )
     data_of_created = models.DateTimeField(
         _('data of create'),
@@ -63,6 +64,31 @@ class Page(models.Model):
         50 characters
         """
         return truncatechars(self.title, 50)
+
+    def __str__(self):
+        return self.title
+
+
+class BlockPage(models.Model):
+    """Blocks that make up page content page"""
+
+    title = models.CharField(
+        _('title'),
+        max_length=255,
+        unique=True,
+        help_text=_("At most 255 characters.")
+    )
+    content = HTMLField(_('content of block'))
+    data_of_created = models.DateTimeField(
+        _('data of create'),
+        auto_now_add=True,
+        auto_now=False
+    )
+    data_of_updated = models.DateTimeField(
+        _('data of updated'),
+        auto_now_add=False,
+        auto_now=True
+    )
 
     def __str__(self):
         return self.title

@@ -5,7 +5,7 @@ services:
     image: redis
     command: redis-server
     ports:
-      - '6379:6379'
+      - "6379:6379"
   db:
     build: ./db
     environment:
@@ -18,6 +18,23 @@ services:
       - ./db/backups:/var/pg/backups
     ports:
       - "5432:5432"
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=altheone.official@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=alpass
+    ports:
+      - "9080:80"
+    depends_on:
+      - db
+  rabbit:
+    image: "rabbitmq:3-management"
+    environment:
+      - RABBITMQ_DEFAULT_USER=aladmin
+      - RABBITMQ_DEFAULT_PASS=alpass
+    ports:
+      - "15673:15672"
+      - "5673:5672"
   web:
     build: ./mlp_api
     command: gunicorn -c gunicorn.conf mlp_api.wsgi
@@ -39,7 +56,7 @@ services:
       - web
     command: nginx -g 'daemon off;'
     ports:
-      - "8090:80"
+      - "80:80"
     volumes:
       - ./mlp_api/static:/mlp_api/static
       - ./mlp_api/media:/mlp_api/media

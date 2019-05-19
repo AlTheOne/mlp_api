@@ -6,6 +6,6 @@ class PageViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = Page.objects.all()
+    queryset = Page.objects.filter(is_activate=True)
     serializer_class = PageSerializer
     lookup_field = 'slug'

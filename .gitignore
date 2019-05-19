@@ -13,3 +13,4 @@ mlp_api/mlp_api/settings_dev.py
 .idea/
 db/backups/
 build/
+.env
