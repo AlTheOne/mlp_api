@@ -1,3 +1,4 @@
+from io import BytesIO
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.validators import (
@@ -6,10 +7,10 @@ from django.core.validators import (
     FileExtensionValidator
 )
 from django.utils.text import slugify
-
 from tinymce.models import HTMLField
-from projectApp.validators import FileSizeValidator
-
+from projectApp.tasks import process_project_preview
+from projectApp.utils import get_project_preview_path
+from commonApp.validators import FileSizeValidator
 
 class Project(models.Model):
     """Represents project, published on the web-site."""
@@ -30,7 +31,7 @@ class Project(models.Model):
     )
     preview = models.ImageField(
         _('preview'),
-        upload_to='projectApp/previews/',
+        upload_to=get_project_preview_path,
         validators=[
             FileExtensionValidator(allowed_extensions=['jpg', 'jpeg']),
             FileSizeValidator(2.5 * 1024 * 1024)
@@ -75,20 +76,43 @@ class Project(models.Model):
         verbose_name = _("enrolled project")
         verbose_name_plural = _("enrolled projects")
 
+    def _prepare_preview_update(self):
+        """
+        Checks if there is some difference between present and old images, like:
+        old was replaced or removed, or old doesn't exist and a new was passed.
+        Returns dictionary with parameters for image processing task.
+        (dictionary will be empty if nothing of told above will happen).
+        """
+
+        old_qs = Project.objects.filter(pk=self.id)
+        old_preview = old_qs.first().preview if old_qs.exists() else None
+        preview_process_params = {}
+        if self.preview != old_preview:
+            if old_preview:
+                preview_process_params.update({'img_old_path': old_preview.name})
+            if self.preview:
+                img_file = self.preview.file.file
+                # At the moment we don't need to save the whole uploaded image
+                # cause it will do asynchronous celery worker
+                # so let's put an empty byte stream instead actual image file:
+                self.preview.save(self.preview.name, BytesIO(), save=False)
+                preview_process_params.update({
+                    'img_path': self.preview.name,
+                    'img_file': img_file
+                })
+
+        return preview_process_params
+
     def save(self, *args, **kwargs):
         # Update slug field, if it's empty - write slugified title there:
         self.slug = self.slug.lower() if self.slug else slugify(self.title)
-
-        # Check preview, if it has updated, remove old image:
-        try:
-            old_self = Project.objects.get(id=self.id)
-            if (not self.preview) or self.preview != old_self.preview:
-                old_self.preview.delete(save=False)
-        except:
-            # If it's a new project or a first preview, just don't do nothing:
-            pass
+        # Prepare preview update:
+        preview_process_params = self._prepare_preview_update()
 
         super().save(*args, **kwargs)
+
+        if preview_process_params:
+            process_project_preview.delay(**preview_process_params)
 
     def __str__(self):
         return "'%s' project." % self.title
