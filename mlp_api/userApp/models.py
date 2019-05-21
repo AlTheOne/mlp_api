@@ -4,18 +4,17 @@ from datetime import timedelta
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
 from django.core.validators import MinLengthValidator, FileExtensionValidator
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.conf import settings
 from PIL import Image
 from userApp.manager import UserManager
-from userApp.utils import (
-    get_userpic_path,
-    get_thumbnail_name,
-    generate_random_string
-)
-from userApp.validators import MinImageSizeValidator
+from userApp.utils import get_userpic_path
+from userApp.tasks import UserAvatarProcessing
+from utils.tasks import send_email
+from utils.validators import MinImageSizeValidator
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     login = models.CharField(
@@ -57,7 +56,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.login + ": " + self.email
 
     def email_user(self, subject, message, from_email=None, **kwargs):
-        send_mail(subject, message, from_email, [self.email], **kwargs)
+        send_email.delay(subject, message, from_email, [self.email], **kwargs)
 
 
 class UserPersonalData(models.Model):
@@ -100,6 +99,11 @@ class UserPersonalData(models.Model):
         verbose_name=_('user\'s authorizing data')
     )
 
+    process_avatar = UserAvatarProcessing.initialize(
+        avatar_size=(460, 460),
+        avatar_thumbnail_size=(150, 150)
+    )
+
     class Meta:
         verbose_name = _("personal data of a user")
         verbose_name_plural = _("personal data of users")
@@ -108,62 +112,41 @@ class UserPersonalData(models.Model):
         names = (self.first_name, self.last_name, self.auth_data.login)
         return "%s %s (%s)" % names
 
-    # Handling user's profile picture:
-    avatar_size = (460, 460) # size in pixels
-    avatar_thumbnail_size = (150, 150) # size in pixels
+    def _prepare_avatar_update(self):
+        """
+        Checks if there is some difference between present and old images, like:
+        old was replaced or removed, or old doesn't exist and a new was passed.
+        Returns dictionary with parameters for image processing task.
+        (dictionary will be empty if nothing of told above will happen).
+        """
 
-    def _get_avatar_dir(self):
-        """ Returns path to directory for user's avatar. """
-        user_dir = "user_%s" % self.auth_data.id
-        return os.path.join(settings.MEDIA_ROOT, 'userApp', 'avatar', user_dir)
-
-    def _make_avatar_from_field(self):
-        if not self.avatar: return None
-
-        # Verify if there user picture's directory exists:
-        image_dir = self._get_avatar_dir()
-        if not os.path.exists(image_dir):
-            os.makedirs(image_dir)
-
-        # Resizing given user's picture:
-        correct_image = Image.open(self.avatar.file).resize(self.avatar_size)
-        image_bytestream = io.BytesIO()
-        correct_image.save(image_bytestream, 'JPEG')
-        self.avatar.file = image_bytestream
-
-        # Creating thumbnail:
-        correct_image.thumbnail(self.avatar_thumbnail_size)
-        thumbnail_name = get_thumbnail_name(self.avatar.name)
-        thumbnail_path = os.path.join(image_dir, thumbnail_name)
-        correct_image.save(thumbnail_path, 'JPEG')
-
-    def _update_avatar(self):
-        # Check avatar, if it is updated or removed, delete old image:
         try:
             old_avatar = UserPersonalData.objects.get(id=self.id).avatar
-            # In case of changes of avatar:
-            if self.avatar != old_avatar:
-                # If old avatar is present, it should be removed:
-                if old_avatar:
-                    # Remove avatar thumbnail:
-                    thumbnail_path = os.path.join(
-                        settings.MEDIA_ROOT,
-                        get_thumbnail_name(old_avatar.name)
-                    )
-                    os.remove(thumbnail_path)
-                    # Remove avatar:
-                    old_avatar.delete(save=False)
+        except UserPersonalData.DoesNotExist:
+            old_avatar = None
 
-                # If there is a new avatar, it should be stored:
-                self._make_avatar_from_field()
+        avatar_processing_params = {}
+        if self.avatar != old_avatar:
+            if old_avatar:
+                avatar_processing_params.update({'img_old_path': old_avatar.name})
+            if self.avatar:
+                img_file = self.avatar.file.file
+                # At the moment we don't need to save the whole uploaded image
+                # cause it will do asynchronous celery worker
+                # so let's put an empty byte stream instead actual image file:
+                self.avatar.save(self.avatar.name, io.BytesIO(), save=False)
+                avatar_processing_params.update({
+                    'img_path': self.avatar.name,
+                    'img_file': img_file
+                })
 
-        except (UserPersonalData.DoesNotExist, FileNotFoundError):
-            self._make_avatar_from_field()
+        return avatar_processing_params
 
     def save(self, *args, **kwargs):
-        self._update_avatar()
+        avatar_update_params = self._prepare_avatar_update()
         super().save(*args, **kwargs)
-
+        if avatar_update_params:
+            self.process_avatar.delay(**avatar_update_params)
 
 class UserProgress(models.Model):
     level = models.PositiveSmallIntegerField(
@@ -257,6 +240,6 @@ class AccountActivationCode(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        self.code = generate_random_string(30, 40)
+        self.code = get_random_string(length=30)
         self.notificate_user()
         super().save(*args, **kwargs)

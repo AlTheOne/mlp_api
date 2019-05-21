@@ -190,6 +190,11 @@ REST_FRAMEWORK = {
     ),
 }
 
+# Celery configuration:
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_ACCEPT_CONTENT = ['json', 'pickle']
+
 
 # Include settings for develop
 # File named settings_dev.py
