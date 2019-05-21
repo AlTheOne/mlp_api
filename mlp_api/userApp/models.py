@@ -217,7 +217,7 @@ class AccountActivationCode(models.Model):
         return cls.objects.filter(date_of_creation__gte=time_floor)
 
     def __str__(self):
-        return self.code30
+        return self.code
 
     def _generate_link(self):
         """ Returns reliable account activation link. """
