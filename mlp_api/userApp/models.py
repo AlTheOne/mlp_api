@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.utils.crypto import get_random_string
 from django.core.validators import MinLengthValidator, FileExtensionValidator
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.conf import settings
@@ -11,9 +12,8 @@ from PIL import Image
 from userApp.manager import UserManager
 from userApp.utils import get_userpic_path
 from userApp.tasks import UserAvatarProcessing
-from commonApp.tasks import send_email
-from commonApp.validators import MinImageSizeValidator
-from commonApp.utils import generate_random_string
+from utils.tasks import send_email
+from utils.validators import MinImageSizeValidator
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -217,7 +217,7 @@ class AccountActivationCode(models.Model):
         return cls.objects.filter(date_of_creation__gte=time_floor)
 
     def __str__(self):
-        return self.code
+        return self.code30
 
     def _generate_link(self):
         """ Returns reliable account activation link. """
@@ -240,6 +240,6 @@ class AccountActivationCode(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        self.code = generate_random_string(30, 40)
+        self.code = get_random_string(length=30)
         self.notificate_user()
         super().save(*args, **kwargs)

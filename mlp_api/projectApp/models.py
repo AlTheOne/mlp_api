@@ -10,7 +10,7 @@ from django.utils.text import slugify
 from tinymce.models import HTMLField
 from projectApp.tasks import process_project_preview
 from projectApp.utils import get_project_preview_path
-from commonApp.validators import FileSizeValidator
+from utils.validators import FileSizeValidator
 
 class Project(models.Model):
     """Represents project, published on the web-site."""

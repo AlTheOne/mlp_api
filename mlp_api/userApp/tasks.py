@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils.text import get_valid_filename
 from PIL import Image
 from userApp.utils import get_thumbnail_name
-from commonApp.utils import remove_directory_files
+from utils.filesystem import remove_directory_files
 
 class UserAvatarProcessing(current_app.Task):
     """

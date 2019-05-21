@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from projectApp.models import Project
 from projectApp.serializers import ProjectSerializer
-from commonApp.permissions import IsAdminUserOrReadOnly
+from utils.permissions import IsAdminUserOrReadOnly
 
 
 class ProjectViewSet(viewsets.ModelViewSet):

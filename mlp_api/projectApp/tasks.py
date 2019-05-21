@@ -1,9 +1,7 @@
 import os
 from celery import shared_task
 from django.conf import settings
-from django.utils.text import get_valid_filename
 from PIL import Image
-from commonApp.utils import remove_directory_files
 
 @shared_task
 def process_project_preview(img_path=None, img_file=None, img_old_path=None):
