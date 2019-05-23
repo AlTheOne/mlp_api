@@ -25,6 +25,10 @@ class PageAdmin(admin.ModelAdmin):
     )
     save_on_top = True
 
+    def get_readonly_fields(self, request, obj=None):
+        request.user.has_perm('app.readonly_page')
+        return self.readonly_fields
+
 
 @admin.register(BlockPage)
 class BlockPageAdmin(admin.ModelAdmin):

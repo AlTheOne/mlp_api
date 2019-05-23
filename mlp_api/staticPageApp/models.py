@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import truncatechars
 
+
 from pytils.translit import slugify
 from tinymce.models import HTMLField
 
@@ -49,6 +50,10 @@ class Page(models.Model):
     class Meta:
         verbose_name = _("static page")
         verbose_name_plural = _("static pages")
+
+        permissions = (
+            ('readonly_page', 'Readonly Page'),
+        )
 
     def save(self, *args, **kwargs):
         """
