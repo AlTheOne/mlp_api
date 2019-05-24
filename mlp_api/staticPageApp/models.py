@@ -51,10 +51,6 @@ class Page(models.Model):
         verbose_name = _("static page")
         verbose_name_plural = _("static pages")
 
-        permissions = (
-            ('readonly_page', 'Readonly Page'),
-        )
-
     def save(self, *args, **kwargs):
         """
         If the field is not filled when saving, it is automatically
