@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from staticPageApp.models import Page
 from staticPageApp.serializers import PageSerializer
+from utils.permissions import IsAdminUserOrReadOnly
 
 class PageViewSet(viewsets.ModelViewSet):
     """
@@ -8,4 +9,5 @@ class PageViewSet(viewsets.ModelViewSet):
     """
     queryset = Page.objects.filter(is_activate=True)
     serializer_class = PageSerializer
+    permission_classes = (IsAdminUserOrReadOnly,)
     lookup_field = 'slug'
