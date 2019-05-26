@@ -14,3 +14,4 @@ mlp_api/mlp_api/settings_dev.py
 db/backups/
 build/
 .env
+celerybeat-schedule.db
