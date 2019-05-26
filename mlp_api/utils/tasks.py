@@ -3,6 +3,7 @@ from django.core.mail import send_mail
 from django.apps import apps
 from django.utils import timezone
 
+
 @shared_task
 def send_email(subject, message, from_email, to, **kwargs):
     send_mail(subject, message, from_email, to, **kwargs)

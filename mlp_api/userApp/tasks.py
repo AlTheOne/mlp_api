@@ -18,6 +18,7 @@ class UserAvatarProcessing(current_app.Task):
     name = 'userApp.tasks.process_user_avatar'
     serializer = 'pickle'
 
+
     def __init__(self, avatar_size, avatar_thumbnail_size):
         self.avatar_size = avatar_size
         self.avatar_thumbnail_size = avatar_thumbnail_size
