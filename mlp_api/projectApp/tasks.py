@@ -3,7 +3,7 @@ from celery import shared_task
 from django.conf import settings
 from PIL import Image
 
-@shared_task
+@shared_task(serializer='pickle')
 def process_project_preview(img_path=None, img_file=None, img_old_path=None):
     """
     The task takes next arguments:

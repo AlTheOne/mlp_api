@@ -25,7 +25,7 @@ class AccountActivationViewSet(GenericViewSet):
     lookup_field = 'code'
 
     def get_queryset(self):
-        return AccountActivationCode.get_actuals()
+        return AccountActivationCode.objects.all()
 
     def retrieve(self, request, code=None):
         """
@@ -58,8 +58,6 @@ class AccountActivationViewSet(GenericViewSet):
                 # Activation link already exists, so just send it to user:
                 user.activation_code.notificate_user()
             else:
-                # Remove expired link of the user:
-                AccountActivationCode.objects.filter(user=user).delete()
                 # Create new one:
                 AccountActivationCode.objects.create(user=user)
 
