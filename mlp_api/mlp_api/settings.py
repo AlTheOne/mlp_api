@@ -191,8 +191,8 @@ REST_FRAMEWORK = {
 }
 
 # Celery configuration:
-CELERY_TASK_SERIALIZER = 'pickle'
-CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 
 

@@ -1,8 +1,6 @@
 import os
 import io
-from datetime import timedelta
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.crypto import get_random_string
 from django.core.validators import MinLengthValidator, FileExtensionValidator
@@ -201,20 +199,10 @@ class AccountActivationCode(models.Model):
         "%(protocol)s://%(hostname)s:%(port)d"
         "/api/v1/account-activation/%(code)s/"
     )
-    expiration_term = timedelta(hours=24)
 
     class Meta:
         verbose_name = _("account activation code")
         verbose_name_plural = _("account activation codes")
-
-    @classmethod
-    def get_actuals(cls):
-        """
-        Returns filtered queryset of model items,
-        which was created not later then expiration date.
-        """
-        time_floor = timezone.now() - cls.expiration_term
-        return cls.objects.filter(date_of_creation__gte=time_floor)
 
     def __str__(self):
         return self.code
