@@ -25,7 +25,6 @@ class PageAdmin(admin.ModelAdmin):
     )
     save_on_top = True
 
-
 @admin.register(BlockPage)
 class BlockPageAdmin(admin.ModelAdmin):
     list_display = (
