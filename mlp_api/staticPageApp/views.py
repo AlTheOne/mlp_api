@@ -1,7 +1,9 @@
 from rest_framework import viewsets
 from staticPageApp.models import Page
 from staticPageApp.serializers import PageSerializer
-from utils.permissions import IsAdminUserOrReadOnly
+
+from rest_framework import permissions
+
 
 class PageViewSet(viewsets.ModelViewSet):
     """
@@ -9,5 +11,5 @@ class PageViewSet(viewsets.ModelViewSet):
     """
     queryset = Page.objects.filter(is_activate=True)
     serializer_class = PageSerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
+    permission_classes = (permissions.DjangoModelPermissionsOrAnonReadOnly, permissions.IsAuthenticatedOrReadOnly,)
     lookup_field = 'slug'
